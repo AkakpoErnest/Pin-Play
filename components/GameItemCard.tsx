@@ -31,6 +31,7 @@ interface GameItem {
 interface GameItemCardProps {
   item: GameItem;
   onPurchase: () => void;
+  isLoading?: boolean;
 }
 
 const rarityColors = {
@@ -58,16 +59,23 @@ const typeIcons: Record<string, any> = {
   weapon: Star
 };
 
-export default function GameItemCard({ item, onPurchase }: GameItemCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export default function GameItemCard({ item, onPurchase, isLoading: externalLoading }: GameItemCardProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
+  // Use external loading state if provided, otherwise use internal state
+  const isLoading = externalLoading !== undefined ? externalLoading : internalLoading;
+
   const handlePurchase = async () => {
-    setIsLoading(true);
+    if (externalLoading === undefined) {
+      setInternalLoading(true);
+    }
     try {
       await onPurchase();
     } finally {
-      setIsLoading(false);
+      if (externalLoading === undefined) {
+        setInternalLoading(false);
+      }
     }
   };
 

@@ -152,7 +152,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Format KRW balance
-  const krwBalance = krwBalanceData ? ethers.formatEther(krwBalanceData) : '0';
+  const krwBalance = krwBalanceData ? ethers.formatEther(krwBalanceData.toString()) : '0';
 
   // Mint test tokens function
   const mintTestTokens = async () => {
