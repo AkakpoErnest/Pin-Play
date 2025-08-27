@@ -7,7 +7,8 @@ interface FeatureCardProps {
   icon: ReactNode;
   title: string;
   description: string;
-  color: 'blue' | 'green' | 'purple' | 'yellow' | 'indigo' | 'pink';
+  color: 'blue' | 'green' | 'purple' | 'yellow' | 'indigo' | 'pink' | 'orange';
+  className?: string;
 }
 
 const colorVariants = {
@@ -19,26 +20,31 @@ const colorVariants = {
   pink: 'hover:border-pink-300 hover:shadow-pink-100',
 };
 
-export default function FeatureCard({ icon, title, description, color }: FeatureCardProps) {
+export default function FeatureCard({ icon, title, description, color, className }: FeatureCardProps) {
   return (
     <div className={clsx(
-      'card group cursor-pointer',
+      'group cursor-pointer relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:scale-105',
+      className || 'card',
       colorVariants[color]
     )}>
-      <div className="p-6 space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0 transform group-hover:scale-110 transition-transform duration-200">
+      <div className="p-8 space-y-6 relative z-10">
+        <div className="flex items-center space-x-4">
+          <div className="flex-shrink-0 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300">
             {icon}
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors duration-200">
+          <h3 className="text-2xl font-bold text-white group-hover:animate-neon-pulse transition-all duration-300">
             {title}
           </h3>
         </div>
         
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-gray-300 leading-relaxed text-lg font-medium group-hover:text-white transition-colors duration-300">
           {description}
         </p>
       </div>
+      
+      {/* Gaming card effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
     </div>
   );
 }

@@ -20,32 +20,47 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: linear-gradient(135deg, #0a0015 0%, #1a0033 25%, #2d0066 50%, #1a0033 75%, #0a0015 100%);
   font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
+/* Epic gaming background effects */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(221, 0, 255, 0.1) 0%, transparent 30%),
+    radial-gradient(circle at 40% 70%, rgba(0, 255, 128, 0.05) 0%, transparent 25%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Epic Gaming scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: linear-gradient(to bottom, #1a0033, #2d0066);
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: linear-gradient(to bottom, #00ffff, #dd00ff);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: linear-gradient(to bottom, #dd00ff, #00ff80);
+  box-shadow: 0 0 15px rgba(221, 0, 255, 0.7);
 }
 
 /* Gaming-themed animations */
