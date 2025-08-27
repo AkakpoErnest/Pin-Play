@@ -6,9 +6,6 @@ import { WagmiConfig, createConfig, configureChains } from 'wagmi';
 import { hardhat, sepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { InjectedConnector } from 'wagmi/connectors/injected';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -57,7 +54,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-50 to-blue-50`}>
+      <body className={`${inter.className} min-h-screen`}>
         <QueryClientProvider client={queryClient}>
           <WagmiConfig config={config}>
             <RainbowKitProvider chains={chains}>

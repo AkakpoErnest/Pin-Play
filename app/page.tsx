@@ -75,21 +75,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="text-center space-y-12 py-16 relative">
         <div className="space-y-8 animate-slide-up">
-          <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-cyber-500/20 to-gaming-500/20 backdrop-blur-sm text-neon-blue px-8 py-4 rounded-full text-sm font-bold border border-neon-blue/30 shadow-lg shadow-neon-blue/20 animate-neon-border">
-            <Star className="w-6 h-6 text-neon-yellow animate-power-up" />
-            <span className="font-bold text-lg">🇰🇷 Korea Stablecoin Hackathon Project</span>
-            <Rocket className="w-6 h-6 text-neon-orange animate-level-up" />
-          </div>
-          
           <h1 className="text-7xl md:text-9xl font-black bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink bg-clip-text text-transparent leading-tight animate-neon-pulse">
             KRW GAME ARENA
           </h1>
           
           <div className="relative">
             <p className="text-2xl md:text-3xl text-white max-w-5xl mx-auto leading-relaxed font-bold drop-shadow-lg">
-              🎮 Enter the <span className="text-neon-green animate-cyber-glitch">ULTIMATE</span> gaming ecosystem! 
-              Trade NFTs with <span className="text-neon-yellow font-black">KRW stablecoin</span> power. 
-              <br />⚡ Zero lag. Maximum fun. Infinite possibilities! ⚡
+              Gaming ecosystem powered by <span className="text-neon-yellow font-black">KRW stablecoin</span>. 
+              <br />Trade NFTs with instant payments and low fees.
             </p>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neon-blue/10 to-transparent blur-sm -z-10 animate-energy-pulse"></div>
           </div>
@@ -176,7 +169,7 @@ export default function HomePage() {
                 <WalletConnection />
               </div>
               <p className="text-neon-green font-bold text-xl animate-cyber-glitch">
-                🚀 CONNECT TO START YOUR GAMING JOURNEY! 🚀
+                Connect wallet to start trading
               </p>
             </div>
           )}
@@ -224,55 +217,55 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="text-2xl text-neon-blue max-w-3xl mx-auto font-bold">
-            🎯 Next-gen blockchain gaming with <span className="text-neon-yellow animate-cyber-glitch">INSANE</span> features!
+            Next-gen blockchain gaming with powerful features
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           <FeatureCard
             icon={<CreditCard className="w-10 h-10 text-neon-blue animate-power-up" />}
-            title="⚡ KRW LIGHTNING PAYMENTS"
-            description="Ultra-fast, zero-volatility KRW transactions. Pay like a pro gamer - instant and precise!"
+            title="KRW LIGHTNING PAYMENTS"
+            description="Ultra-fast, zero-volatility KRW transactions. Instant and precise payments."
             color="blue"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-blue/40 hover:border-neon-blue animate-hover-lift hover:shadow-2xl hover:shadow-neon-blue/30"
           />
           
           <FeatureCard
             icon={<Zap className="w-10 h-10 text-neon-yellow animate-level-up" />}
-            title="🚀 QUANTUM SPEED"
-            description="Blazing-fast settlements with microscopic fees. Perfect for rapid-fire gaming transactions!"
+            title="QUANTUM SPEED"
+            description="Blazing-fast settlements with minimal fees. Perfect for gaming transactions."
             color="yellow"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-yellow/40 hover:border-neon-yellow animate-hover-lift hover:shadow-2xl hover:shadow-neon-yellow/30"
           />
           
           <FeatureCard
             icon={<Shield className="w-10 h-10 text-neon-green animate-energy-pulse" />}
-            title="🛡️ FORTRESS SECURITY"
-            description="Military-grade blockchain security. Your assets are safer than a boss's treasure vault!"
+            title="FORTRESS SECURITY"
+            description="Military-grade blockchain security. Your assets are completely secure."
             color="green"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-green/40 hover:border-neon-green animate-hover-lift hover:shadow-2xl hover:shadow-neon-green/30"
           />
           
           <FeatureCard
             icon={<Gamepad2 className="w-10 h-10 text-neon-purple animate-game-bounce" />}
-            title="🎮 GAMER DNA"
-            description="Built by gamers, for gamers. Features like item locking, durability, and epic rarity systems!"
+            title="GAMER DNA"
+            description="Built by gamers, for gamers. Features like item locking, durability, and rarity systems."
             color="purple"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-purple/40 hover:border-neon-purple animate-hover-lift hover:shadow-2xl hover:shadow-neon-purple/30"
           />
           
           <FeatureCard
             icon={<Users className="w-10 h-10 text-neon-pink animate-cyber-glitch" />}
-            title="💰 DEV REWARDS"
-            description="Game developers earn from every epic transaction. Built-in royalty system that pays!"
+            title="DEV REWARDS"
+            description="Game developers earn from every transaction. Built-in royalty system."
             color="pink"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-pink/40 hover:border-neon-pink animate-hover-lift hover:shadow-2xl hover:shadow-neon-pink/30"
           />
           
           <FeatureCard
             icon={<Target className="w-10 h-10 text-neon-orange animate-rotate-slow" />}
-            title="🌍 GLOBAL DOMINATION"
-            description="Conquer international markets with seamless cross-border payments and currency magic!"
+            title="GLOBAL REACH"
+            description="Seamless cross-border payments and international currency support."
             color="orange"
             className="bg-gradient-to-br from-dark-600/70 to-dark-800/70 backdrop-blur-sm border-2 border-neon-orange/40 hover:border-neon-orange animate-hover-lift hover:shadow-2xl hover:shadow-neon-orange/30"
           />
@@ -295,9 +288,9 @@ export default function HomePage() {
               <div className="w-24 h-24 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-neon-blue/30 animate-energy-pulse group-hover:scale-110 transition-transform duration-300">
                 <span className="text-white font-black text-3xl">1</span>
               </div>
-              <h3 className="text-2xl font-bold text-neon-blue">🔗 POWER UP</h3>
+              <h3 className="text-2xl font-bold text-neon-blue">CONNECT</h3>
               <p className="text-white font-medium text-lg">
-                Connect your wallet and fuel up with KRW stablecoin to enter the arena!
+                Connect your wallet and get KRW stablecoin to start trading.
               </p>
             </div>
             
@@ -305,9 +298,9 @@ export default function HomePage() {
               <div className="w-24 h-24 bg-gradient-to-r from-neon-purple to-neon-pink rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-neon-purple/30 animate-energy-pulse group-hover:scale-110 transition-transform duration-300">
                 <span className="text-white font-black text-3xl">2</span>
               </div>
-              <h3 className="text-2xl font-bold text-neon-purple">🛒 HUNT & COLLECT</h3>
+              <h3 className="text-2xl font-bold text-neon-purple">TRADE</h3>
               <p className="text-white font-medium text-lg">
-                Explore legendary items across multiple game worlds and collect with stable pricing!
+                Explore items across multiple games and trade with stable pricing.
               </p>
             </div>
             
@@ -315,9 +308,9 @@ export default function HomePage() {
               <div className="w-24 h-24 bg-gradient-to-r from-neon-green to-neon-yellow rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-neon-green/30 animate-energy-pulse group-hover:scale-110 transition-transform duration-300">
                 <span className="text-white font-black text-3xl">3</span>
               </div>
-              <h3 className="text-2xl font-bold text-neon-green">⚔️ DOMINATE</h3>
+              <h3 className="text-2xl font-bold text-neon-green">PLAY</h3>
               <p className="text-white font-medium text-lg">
-                Your items appear instantly in supported games with full ownership powers!
+                Your items appear instantly in supported games with full ownership.
               </p>
             </div>
           </div>
@@ -329,12 +322,11 @@ export default function HomePage() {
         <div className="space-y-8">
           <h2 className="text-6xl md:text-7xl font-black text-white animate-neon-pulse">
             <span className="bg-gradient-to-r from-neon-red via-neon-orange to-neon-yellow bg-clip-text text-transparent">
-              READY TO DOMINATE?
+              READY TO START?
             </span>
           </h2>
           <p className="text-2xl text-neon-blue max-w-3xl mx-auto font-bold animate-cyber-glitch">
-            Join the <span className="text-neon-yellow">ELITE</span> gaming community! 
-            <br />🔥 <span className="text-neon-red">15,432+</span> warriors already gaming with KRW power! 🔥
+            Join the gaming community with <span className="text-neon-red">15,432+</span> active users
           </p>
         </div>
 
@@ -343,14 +335,14 @@ export default function HomePage() {
             href="/marketplace" 
             className="group relative overflow-hidden bg-gradient-to-r from-neon-red via-neon-orange to-neon-yellow hover:from-neon-yellow hover:to-neon-red text-white font-black py-6 px-16 rounded-3xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-neon-orange/50 inline-flex items-center space-x-4 text-2xl animate-energy-pulse border-4 border-neon-orange/50"
           >
-            <span className="animate-power-up">🚀 START GAMING</span>
+            <span className="animate-power-up">START GAMING</span>
             <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform duration-200 animate-level-up" />
           </Link>
           <Link 
             href="/developers" 
             className="group relative overflow-hidden bg-gradient-to-r from-dark-600 to-dark-800 hover:from-neon-purple hover:to-neon-blue text-white font-bold py-6 px-16 rounded-3xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-neon-purple/50 inline-flex items-center space-x-4 text-2xl border-4 border-neon-purple/50 animate-glow"
           >
-            <span>⚡ FOR DEVS</span>
+            <span>FOR DEVS</span>
           </Link>
         </div>
       </section>
