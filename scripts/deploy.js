@@ -63,28 +63,110 @@ async function main() {
   await krwStablecoin.mint(deployer.address, demoAmount);
   console.log("✅ Minted 100,000 KRWGC to deployer");
 
-  // Create some demo NFTs
+  // Create some demo NFTs with real metadata
   console.log("\n🎯 Creating demo game items...");
   const demoItems = [
-    { type: "sword", rarity: 3, uri: "https://api.example.com/metadata/sword1.json" },
-    { type: "shield", rarity: 2, uri: "https://api.example.com/metadata/shield1.json" },
-    { type: "potion", rarity: 1, uri: "https://api.example.com/metadata/potion1.json" },
-    { type: "armor", rarity: 4, uri: "https://api.example.com/metadata/armor1.json" },
+    { 
+      type: "sword", 
+      rarity: 5, 
+      name: "Quantum Quasar Blade",
+      uri: JSON.stringify({
+        name: "Quantum Quasar Blade",
+        description: "A legendary sword that cuts through dimensions with quantum energy.",
+        image: "https://pin-play-7rl9.vercel.app/nft-items/quantum_quasar_card.png",
+        attributes: [
+          { trait_type: "Rarity", value: "Legendary" },
+          { trait_type: "Attack", value: 160 },
+          { trait_type: "Defense", value: 25 },
+          { trait_type: "Game", value: "demo-rpg" }
+        ]
+      })
+    },
+    { 
+      type: "armor", 
+      rarity: 4, 
+      name: "Vortex Vanguard Armor",
+      uri: JSON.stringify({
+        name: "Vortex Vanguard Armor",
+        description: "Epic armor that channels the power of cosmic vortexes for ultimate protection.",
+        image: "https://pin-play-7rl9.vercel.app/nft-items/vortex_vanguard_card.png",
+        attributes: [
+          { trait_type: "Rarity", value: "Epic" },
+          { trait_type: "Attack", value: 40 },
+          { trait_type: "Defense", value: 140 },
+          { trait_type: "Game", value: "demo-rpg" }
+        ]
+      })
+    },
+    { 
+      type: "shield", 
+      rarity: 3, 
+      name: "Pin Blazer Shield",
+      uri: JSON.stringify({
+        name: "Pin Blazer Shield",
+        description: "A rare shield that blazes with protective energy and deflects even magical attacks.",
+        image: "https://pin-play-7rl9.vercel.app/nft-items/pin_blazer_card.png",
+        attributes: [
+          { trait_type: "Rarity", value: "Rare" },
+          { trait_type: "Attack", value: 15 },
+          { trait_type: "Defense", value: 95 },
+          { trait_type: "Game", value: "demo-rpg" }
+        ]
+      })
+    },
+    { 
+      type: "potion", 
+      rarity: 2, 
+      name: "Aether Weaver Elixir",
+      uri: JSON.stringify({
+        name: "Aether Weaver Elixir",
+        description: "An uncommon potion that weaves aether magic to restore health and mana.",
+        image: "https://pin-play-7rl9.vercel.app/nft-items/aether_weaver_card.png",
+        attributes: [
+          { trait_type: "Rarity", value: "Uncommon" },
+          { trait_type: "Attack", value: 0 },
+          { trait_type: "Defense", value: 0 },
+          { trait_type: "Healing", value: 150 },
+          { trait_type: "Game", value: "demo-rpg" }
+        ]
+      })
+    },
+    { 
+      type: "armor", 
+      rarity: 4, 
+      name: "Shadow Sentinel Plate",
+      uri: JSON.stringify({
+        name: "Shadow Sentinel Plate",
+        description: "Epic armor forged from shadow essence, providing stealth and protection.",
+        image: "https://pin-play-7rl9.vercel.app/nft-items/shadow_sentinel_card.png",
+        attributes: [
+          { trait_type: "Rarity", value: "Epic" },
+          { trait_type: "Attack", value: 35 },
+          { trait_type: "Defense", value: 135 },
+          { trait_type: "Stealth", value: 50 },
+          { trait_type: "Game", value: "demo-rpg" }
+        ]
+      })
+    }
   ];
 
   for (let i = 0; i < demoItems.length; i++) {
     const item = demoItems[i];
+    const metadata = JSON.parse(item.uri);
+    const attack = metadata.attributes.find(attr => attr.trait_type === "Attack")?.value || (100 + (item.rarity * 20));
+    const defense = metadata.attributes.find(attr => attr.trait_type === "Defense")?.value || (50 + (item.rarity * 15));
+    
     await gameItemNFT.mintGameItem(
       deployer.address,
       item.type,
       item.rarity,
-      100 + (item.rarity * 20), // attack
-      50 + (item.rarity * 15),  // defense
+      attack,
+      defense,
       100,                      // durability
       "demo-rpg",
       item.uri
     );
-    console.log(`✅ Minted ${item.type} (rarity ${item.rarity}) NFT #${i}`);
+    console.log(`✅ Minted ${item.name} (${item.type}, rarity ${item.rarity}) NFT #${i}`);
   }
 
   // List some items on marketplace
@@ -93,15 +175,20 @@ async function main() {
   // Approve marketplace to transfer NFTs
   await gameItemNFT.setApprovalForAll(marketplaceAddress, true);
   
-  // List first two items
-  const prices = [
-    ethers.parseEther("5000"),  // sword - 5000 KRWGC
-    ethers.parseEther("3000"),  // shield - 3000 KRWGC
-  ];
+  // List all items with rarity-based pricing
+  const basePrices = {
+    1: ethers.parseEther("500"),    // Common - 500 KRWGC
+    2: ethers.parseEther("1500"),   // Uncommon - 1500 KRWGC  
+    3: ethers.parseEther("4000"),   // Rare - 4000 KRWGC
+    4: ethers.parseEther("10000"),  // Epic - 10000 KRWGC
+    5: ethers.parseEther("25000"),  // Legendary - 25000 KRWGC
+  };
 
-  for (let i = 0; i < 2; i++) {
-    await gameMarketplace.listItem(i, prices[i]);
-    console.log(`✅ Listed NFT #${i} for ${ethers.formatEther(prices[i])} KRWGC`);
+  for (let i = 0; i < demoItems.length; i++) {
+    const item = demoItems[i];
+    const price = basePrices[item.rarity];
+    await gameMarketplace.listItem(i, price);
+    console.log(`✅ Listed ${item.name} (#${i}) for ${ethers.formatEther(price)} KRWGC`);
   }
 
   // Summary
