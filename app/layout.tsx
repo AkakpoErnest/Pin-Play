@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import { Toaster } from '@/components/ui/Toaster';
+import { WalletProvider } from '@/components/WalletProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -66,11 +67,12 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <WagmiConfig config={config}>
             <RainbowKitProvider chains={chains}>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-1 container mx-auto px-4 py-8">
-                  {children}
-                </main>
+              <WalletProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-1 container mx-auto px-4 py-8">
+                    {children}
+                  </main>
                 <footer className="bg-gray-900 text-white py-8 mt-auto">
                   <div className="container mx-auto px-4 text-center">
                     <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
@@ -91,6 +93,7 @@ export default function RootLayout({
                 </footer>
               </div>
               <Toaster />
+              </WalletProvider>
             </RainbowKitProvider>
           </WagmiConfig>
         </QueryClientProvider>

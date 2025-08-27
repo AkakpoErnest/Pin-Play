@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { 
   CreditCard, 
   Send, 
@@ -11,9 +11,19 @@ import {
   Package,
   TrendingUp,
   Wallet as WalletIcon,
-  ExternalLink
+  ExternalLink,
+  Copy,
+  RefreshCw,
+  Zap,
+  Shield,
+  Sword,
+  Star,
+  Clock,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import WalletConnection from '@/components/WalletConnection';
+import { useWallet } from '@/components/WalletProvider';
 import { toast } from '@/components/ui/Toaster';
 
 // Mock transaction history
@@ -89,17 +99,22 @@ const mockOwnedItems = [
 
 export default function WalletPage() {
   const { address, isConnected } = useAccount();
+  const { 
+    krwBalance, 
+    isLoadingBalance, 
+    mintTestTokens, 
+    sendTokens,
+    ownedItems,
+    isLoadingItems,
+    refreshItems,
+    isTransacting,
+    lastTransaction
+  } = useWallet();
+  
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [sendAmount, setSendAmount] = useState('');
   const [sendAddress, setSendAddress] = useState('');
-
-  // Mock balance data
-  const mockBalance = {
-    krwgc: '127500', // KRW Game Credits
-    eth: '0.025',    // ETH
-    usd: '98.50'     // USD equivalent
-  };
 
   useEffect(() => {
     setMounted(true);
@@ -112,9 +127,7 @@ export default function WalletPage() {
     }
 
     try {
-      toast.info('Sending Transaction', 'Confirming transaction...');
-      // Mock sending - in real app would interact with smart contracts
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await sendTokens(sendAddress, sendAmount);
       toast.success('Transaction Sent!', `Sent ${sendAmount} KRWGC to ${sendAddress.slice(0, 6)}...`);
       setSendAmount('');
       setSendAddress('');
@@ -125,12 +138,33 @@ export default function WalletPage() {
 
   const handleMint = async () => {
     try {
-      toast.info('Minting Tokens', 'Requesting KRW Game Credits...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await mintTestTokens();
       toast.success('Tokens Minted!', 'Added 10,000 KRWGC to your wallet');
     } catch (error) {
       toast.error('Minting Failed', 'Please try again');
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied!', 'Address copied to clipboard');
+  };
+
+  const getRarityColor = (rarity: number) => {
+    const colors = {
+      1: 'text-gray-600 bg-gray-100',
+      2: 'text-green-600 bg-green-100',
+      3: 'text-blue-600 bg-blue-100', 
+      4: 'text-purple-600 bg-purple-100',
+      5: 'text-yellow-600 bg-yellow-100'
+    };
+    return colors[rarity as keyof typeof colors] || colors[1];
+  };
+
+  const getRarityStars = (rarity: number) => {
+    return Array.from({ length: rarity }, (_, i) => (
+      <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+    ));
   };
 
   if (!mounted) {
@@ -185,10 +219,14 @@ export default function WalletPage() {
             </div>
             <div>
               <div className="text-3xl font-bold">
-                {formatNumber(mockBalance.krwgc)}
+                {isLoadingBalance ? (
+                  <div className="animate-pulse bg-white/20 h-8 w-24 rounded"></div>
+                ) : (
+                  formatNumber(parseFloat(krwBalance).toFixed(0))
+                )}
               </div>
               <div className="text-sm opacity-80">
-                ≈ ${mockBalance.usd} USD
+                ≈ ${(parseFloat(krwBalance) * 0.00075).toFixed(2)} USD
               </div>
             </div>
           </div>
@@ -221,7 +259,11 @@ export default function WalletPage() {
             </div>
             <div>
               <div className="text-3xl font-bold text-gray-900">
-                {mockOwnedItems.length}
+                {isLoadingItems ? (
+                  <div className="animate-pulse bg-gray-300 h-8 w-16 rounded"></div>
+                ) : (
+                  ownedItems.length
+                )}
               </div>
               <div className="text-sm text-gray-600">
                 Digital assets owned
@@ -237,12 +279,23 @@ export default function WalletPage() {
           <div className="text-sm text-gray-600">Connected Address</div>
           <div className="font-mono text-lg">{formatAddress(address || '')}</div>
         </div>
-        <button
-          onClick={() => navigator.clipboard.writeText(address || '')}
-          className="btn-secondary text-sm"
-        >
-          Copy
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => copyToClipboard(address || '')}
+            className="btn-secondary text-sm flex items-center space-x-1"
+          >
+            <Copy className="w-4 h-4" />
+            <span>Copy</span>
+          </button>
+          <button
+            onClick={refreshItems}
+            className="btn-secondary text-sm flex items-center space-x-1"
+            disabled={isLoadingItems}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoadingItems ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Tab Navigation */}
@@ -274,15 +327,22 @@ export default function WalletPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={handleMint}
-              className="card hover:shadow-lg transition-all duration-300 group"
+              disabled={isTransacting}
+              className="card hover:shadow-lg transition-all duration-300 group disabled:opacity-50"
             >
               <div className="p-6 flex items-center space-x-4">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
-                  <Plus className="w-6 h-6 text-green-600" />
+                  {isTransacting ? (
+                    <RefreshCw className="w-6 h-6 text-green-600 animate-spin" />
+                  ) : (
+                    <Plus className="w-6 h-6 text-green-600" />
+                  )}
                 </div>
                 <div className="text-left">
                   <div className="font-semibold text-gray-900">Get Test Tokens</div>
-                  <div className="text-sm text-gray-600">Mint 10,000 KRWGC for demo</div>
+                  <div className="text-sm text-gray-600">
+                    {isTransacting ? 'Minting...' : 'Mint 10,000 KRWGC for demo'}
+                  </div>
                 </div>
               </div>
             </button>
@@ -336,16 +396,23 @@ export default function WalletPage() {
                   className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <div className="mt-2 text-sm text-gray-600">
-                  Available: {formatNumber(mockBalance.krwgc)} KRWGC
+                  Available: {formatNumber(parseFloat(krwBalance).toFixed(0))} KRWGC
                 </div>
               </div>
 
               <button
                 onClick={handleSend}
-                disabled={!sendAmount || !sendAddress}
+                disabled={!sendAmount || !sendAddress || isTransacting}
                 className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Transaction
+                {isTransacting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  'Send Transaction'
+                )}
               </button>
             </div>
           </div>
@@ -401,42 +468,70 @@ export default function WalletPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-900">My Items</h3>
             <div className="text-sm text-gray-600">
-              {mockOwnedItems.length} item{mockOwnedItems.length !== 1 ? 's' : ''}
+              {ownedItems.length} item{ownedItems.length !== 1 ? 's' : ''}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockOwnedItems.map((item) => (
-              <div key={item.id} className="card">
-                <div className="aspect-square bg-gray-100 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4 space-y-3">
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                    <p className="text-sm text-gray-600 capitalize">{item.type} • {item.game}</p>
+          {isLoadingItems ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card animate-pulse">
+                  <div className="aspect-square bg-gray-200"></div>
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
                   </div>
-                  
-                  <div className="flex justify-between items-center">
+                </div>
+              ))}
+            </div>
+          ) : ownedItems.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ownedItems.map((item) => (
+                <div key={item.tokenId} className="card">
+                  <div className="aspect-square bg-gray-100 overflow-hidden flex items-center justify-center">
+                    {item.itemType === 'sword' && <Sword className="w-24 h-24 text-orange-500" />}
+                    {item.itemType === 'shield' && <Shield className="w-24 h-24 text-blue-500" />}
+                    {item.itemType !== 'sword' && item.itemType !== 'shield' && <Package className="w-24 h-24 text-purple-500" />}
+                  </div>
+                  <div className="p-4 space-y-3">
                     <div>
-                      <div className="text-sm text-gray-600">Estimated Value</div>
-                      <div className="font-semibold text-gray-900">
-                        {formatNumber(item.estimatedValue)} KRWGC
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-semibold text-gray-900 capitalize">
+                          {item.itemType} #{item.tokenId}
+                        </h4>
+                        <div className="flex">{getRarityStars(item.rarity)}</div>
+                      </div>
+                      <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${getRarityColor(item.rarity)}`}>
+                        {item.game}
                       </div>
                     </div>
                     
-                    <button className="btn-secondary text-sm">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="text-center p-2 bg-red-50 rounded">
+                        <div className="font-semibold text-red-600">⚔️ {item.attack}</div>
+                        <div className="text-xs text-gray-500">Attack</div>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 rounded">
+                        <div className="font-semibold text-blue-600">🛡️ {item.defense}</div>
+                        <div className="text-xs text-gray-500">Defense</div>
+                      </div>
+                    </div>
+                    
+                    <button className="w-full btn-secondary text-sm">
                       List for Sale
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Package className="w-24 h-24 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">No Items Yet</h3>
+              <p className="text-gray-600">Start your adventure and collect epic gaming items!</p>
+            </div>
+          )}
         </div>
       )}
     </div>
