@@ -82,20 +82,35 @@ export function useWallet() {
   return context;
 }
 
-// NFT item type to image mapping
+// NFT item type to image mapping with real game card images
 const getItemImage = (itemType: string, rarity: number): string => {
-  const baseImages: { [key: string]: string } = {
-    sword: '/nft-items/sword.png',
-    shield: '/nft-items/shield.png',
-    potion: '/nft-items/potion.png',
-    armor: '/nft-items/armor.png',
-    bow: '/nft-items/bow.png',
-    helmet: '/nft-items/helmet.png',
-    ring: '/nft-items/ring.png',
-    staff: '/nft-items/staff.png'
+  // Map item types and rarities to specific card images
+  const rarityBasedImages: { [key: string]: string } = {
+    // High rarity items get special card designs
+    'sword-5': '/nft-items/quantum_quasar_card.png',    // Legendary sword
+    'sword-4': '/nft-items/vortex_vanguard_card.png',   // Epic sword
+    'sword-3': '/nft-items/pin_blazer_card.png',        // Rare sword
+    'armor-4': '/nft-items/aether_weaver_card.png',     // Epic armor
+    'armor-3': '/nft-items/vortex_vanguard_card.png',   // Rare armor
+    'shield-3': '/nft-items/pin_blazer_card.png',       // Rare shield
+    'shield-2': '/nft-items/aether_weaver_card.png',    // Uncommon shield
   };
 
-  // Use placeholder if specific image doesn't exist
+  // Try rarity-specific mapping first
+  const rarityKey = `${itemType}-${rarity}`;
+  if (rarityBasedImages[rarityKey]) {
+    return rarityBasedImages[rarityKey];
+  }
+
+  // Fallback to item type mapping
+  const baseImages: { [key: string]: string } = {
+    sword: '/nft-items/quantum_quasar_card.png',
+    shield: '/nft-items/pin_blazer_card.png',
+    potion: '/nft-items/aether_weaver_card.png',
+    armor: '/nft-items/vortex_vanguard_card.png',
+  };
+
+  // Use specific image or placeholder if not found
   return baseImages[itemType] || `https://via.placeholder.com/200x200/333/fff?text=${itemType.toUpperCase()}`;
 };
 
