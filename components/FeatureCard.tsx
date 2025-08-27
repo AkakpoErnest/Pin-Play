@@ -18,6 +18,7 @@ const colorVariants = {
   yellow: 'hover:border-yellow-300 hover:shadow-yellow-100',
   indigo: 'hover:border-indigo-300 hover:shadow-indigo-100',
   pink: 'hover:border-pink-300 hover:shadow-pink-100',
+  orange: 'hover:border-orange-300 hover:shadow-orange-100',
 };
 
 export default function FeatureCard({ icon, title, description, color, className }: FeatureCardProps) {

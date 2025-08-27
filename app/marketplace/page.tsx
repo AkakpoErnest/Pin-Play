@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import WalletConnection from '@/components/WalletConnection';
 import GameItemCard from '@/components/GameItemCard';
+import { useWallet } from '@/components/WalletProvider';
 import { toast } from '@/components/ui/Toaster';
 
 // Mock data for demo - in real app this would come from blockchain
@@ -124,8 +125,8 @@ const typeIcons: Record<string, any> = {
 
 export default function MarketplacePage() {
   const { isConnected } = useAccount();
-  const [items, setItems] = useState(mockItems);
-  const [filteredItems, setFilteredItems] = useState(mockItems);
+  const { marketplaceItems, isLoadingItems, buyItem, isTransacting } = useWallet();
+  const [filteredItems, setFilteredItems] = useState(marketplaceItems);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRarity, setSelectedRarity] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -137,15 +138,19 @@ export default function MarketplacePage() {
     setMounted(true);
   }, []);
 
+  // Update filtered items when marketplace items change
+  useEffect(() => {
+    setFilteredItems(marketplaceItems);
+  }, [marketplaceItems]);
+
   // Filter and sort items
   useEffect(() => {
-    let filtered = [...items];
+    let filtered = [...marketplaceItems];
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.itemType.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.game.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -157,54 +162,52 @@ export default function MarketplacePage() {
 
     // Type filter  
     if (selectedType) {
-      filtered = filtered.filter(item => item.type === selectedType);
+      filtered = filtered.filter(item => item.itemType === selectedType);
     }
 
     // Price range filter
     if (priceRange.min) {
-      filtered = filtered.filter(item => parseInt(item.price) >= parseInt(priceRange.min));
+      filtered = filtered.filter(item => parseFloat(item.price || '0') >= parseFloat(priceRange.min));
     }
     if (priceRange.max) {
-      filtered = filtered.filter(item => parseInt(item.price) <= parseInt(priceRange.max));
+      filtered = filtered.filter(item => parseFloat(item.price || '0') <= parseFloat(priceRange.max));
     }
 
     // Sort
     switch (sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => parseInt(a.price) - parseInt(b.price));
+        filtered.sort((a, b) => parseFloat(a.price || '0') - parseFloat(b.price || '0'));
         break;
       case 'price-high':
-        filtered.sort((a, b) => parseInt(b.price) - parseInt(a.price));
+        filtered.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
         break;
       case 'rarity':
         filtered.sort((a, b) => b.rarity - a.rarity);
         break;
       case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        filtered.sort((a, b) => a.itemType.localeCompare(b.itemType));
         break;
     }
 
     setFilteredItems(filtered);
-  }, [items, searchTerm, selectedRarity, selectedType, priceRange, sortBy]);
+  }, [marketplaceItems, searchTerm, selectedRarity, selectedType, priceRange, sortBy]);
 
-  const handlePurchase = async (itemId: number) => {
+  const handlePurchase = async (tokenId: string, price: string) => {
     if (!isConnected) {
       toast.error('Wallet Required', 'Please connect your wallet to make purchases');
       return;
     }
 
+    if (isTransacting) {
+      return; // Prevent multiple simultaneous transactions
+    }
+
     try {
-      // Mock purchase - in real app would interact with smart contracts
       toast.info('Processing Purchase', 'Confirming transaction...');
-      
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Remove item from marketplace
-      setItems(prev => prev.filter(item => item.id !== itemId));
-      
+      await buyItem(tokenId, price);
       toast.success('Purchase Successful!', 'Item has been added to your inventory');
     } catch (error) {
+      console.error('Purchase error:', error);
       toast.error('Purchase Failed', 'Please try again');
     }
   };
@@ -240,7 +243,15 @@ export default function MarketplacePage() {
     );
   }
 
-  const types = Array.from(new Set(items.map(item => item.type)));
+  const types = Array.from(new Set(marketplaceItems.map(item => item.itemType)));
+
+  if (isLoadingItems) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -366,9 +377,23 @@ export default function MarketplacePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredItems.map((item) => (
             <GameItemCard 
-              key={item.id} 
-              item={item} 
-              onPurchase={() => handlePurchase(item.id)}
+              key={item.tokenId} 
+              item={{
+                id: parseInt(item.tokenId),
+                name: `${item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)}`,
+                type: item.itemType,
+                rarity: item.rarity,
+                price: item.price || '0',
+                attack: item.attack,
+                defense: item.defense,
+                durability: item.durability,
+                game: item.game,
+                image: item.image || `https://via.placeholder.com/300x300/333/fff?text=${item.itemType.toUpperCase()}`,
+                seller: 'Contract',
+                isListed: item.isListed || false
+              }} 
+              onPurchase={() => handlePurchase(item.tokenId, item.price || '0')}
+              isLoading={isTransacting}
             />
           ))}
         </div>

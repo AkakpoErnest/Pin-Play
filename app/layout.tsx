@@ -17,9 +17,9 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Configure chains & providers - including mainnet for better compatibility
+// Configure chains & providers - prioritizing local development
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, sepolia, hardhat],
+  [hardhat, sepolia, mainnet],
   [publicProvider()]
 );
 

@@ -4,19 +4,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAccount, useBalance, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { ethers } from 'ethers';
 
-// Contract addresses from our deployment
+// Contract addresses from deployment
 const CONTRACT_ADDRESSES = {
   KRWStablecoin: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   GameItemNFT: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
   GameMarketplace: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 };
 
-// Simplified ABI for our contracts
+// Contract ABIs
 const KRW_ABI = [
   'function balanceOf(address) view returns (uint256)',
   'function transfer(address to, uint256 amount) returns (bool)',
   'function mint(address to, uint256 amount)',
   'function decimals() view returns (uint8)',
+  'function approve(address spender, uint256 amount) returns (bool)',
   'event Transfer(address indexed from, address indexed to, uint256 value)'
 ] as const;
 
@@ -25,7 +26,15 @@ const NFT_ABI = [
   'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
   'function gameItems(uint256 tokenId) view returns (tuple(string itemType, uint256 rarity, uint256 attack, uint256 defense, uint256 durability, string game, uint256 mintTimestamp, bool isTransferable))',
   'function ownerOf(uint256 tokenId) view returns (address)',
+  'function tokenURI(uint256 tokenId) view returns (string)',
   'function mintGameItem(address to, string itemType, uint256 rarity, uint256 attack, uint256 defense, uint256 durability, string game, string tokenURI) returns (uint256)'
+] as const;
+
+const MARKETPLACE_ABI = [
+  'function getActiveListings() view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime)[])',
+  'function listItem(uint256 tokenId, uint256 price)',
+  'function buyItem(uint256 tokenId) payable',
+  'function getListingByTokenId(uint256 tokenId) view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime))'
 ] as const;
 
 export interface GameItem {
@@ -38,6 +47,9 @@ export interface GameItem {
   game: string;
   mintTimestamp: number;
   isTransferable: boolean;
+  image?: string;
+  price?: string;
+  isListed?: boolean;
 }
 
 export interface WalletContextType {
@@ -49,8 +61,11 @@ export interface WalletContextType {
   
   // NFT functions
   ownedItems: GameItem[];
+  marketplaceItems: GameItem[];
   isLoadingItems: boolean;
   refreshItems: () => Promise<void>;
+  refreshMarketplace: () => Promise<void>;
+  buyItem: (tokenId: string, price: string) => Promise<void>;
   
   // Transaction state
   isTransacting: boolean;
@@ -67,9 +82,27 @@ export function useWallet() {
   return context;
 }
 
+// NFT item type to image mapping
+const getItemImage = (itemType: string, rarity: number): string => {
+  const baseImages: { [key: string]: string } = {
+    sword: '/nft-items/sword.png',
+    shield: '/nft-items/shield.png',
+    potion: '/nft-items/potion.png',
+    armor: '/nft-items/armor.png',
+    bow: '/nft-items/bow.png',
+    helmet: '/nft-items/helmet.png',
+    ring: '/nft-items/ring.png',
+    staff: '/nft-items/staff.png'
+  };
+
+  // Use placeholder if specific image doesn't exist
+  return baseImages[itemType] || `https://via.placeholder.com/200x200/333/fff?text=${itemType.toUpperCase()}`;
+};
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
   const [ownedItems, setOwnedItems] = useState<GameItem[]>([]);
+  const [marketplaceItems, setMarketplaceItems] = useState<GameItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [lastTransaction, setLastTransaction] = useState<string | null>(null);
@@ -91,6 +124,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     enabled: !!address && isConnected,
+    watch: true,
+  });
+
+  // Get marketplace listings
+  const { data: marketplaceListings, refetch: refetchMarketplace } = useContractRead({
+    address: CONTRACT_ADDRESSES.GameMarketplace as `0x${string}`,
+    abi: MARKETPLACE_ABI,
+    functionName: 'getActiveListings',
+    enabled: isConnected,
+    watch: true,
   });
 
   // Format KRW balance
@@ -102,14 +145,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     setIsTransacting(true);
     try {
-      // For demo purposes, we'll simulate a mint transaction
-      // In a real app, this would call the smart contract
+      // This would call the actual contract in a real implementation
+      // For now using the local network
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESSES.KRWStablecoin, KRW_ABI, signer);
+      
       const amount = ethers.parseEther('10000'); // 10,000 tokens
+      const tx = await contract.mint(address, amount);
+      await tx.wait();
       
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Refetch balance
       await refetchBalance();
       setLastTransaction('mint-success');
     } catch (error) {
@@ -126,12 +171,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     setIsTransacting(true);
     try {
-      // For demo purposes, we'll simulate a transfer
-      // In a real app, this would call the smart contract transfer function
-      const amountWei = ethers.parseEther(amount);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESSES.KRWStablecoin, KRW_ABI, signer);
       
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const amountWei = ethers.parseEther(amount);
+      const tx = await contract.transfer(to, amountWei);
+      await tx.wait();
       
       await refetchBalance();
       setLastTransaction('transfer-success');
@@ -143,43 +189,72 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Buy item from marketplace
+  const buyItem = async (tokenId: string, price: string) => {
+    if (!address) return;
+    
+    setIsTransacting(true);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      // First approve the marketplace to spend KRW tokens
+      const krwContract = new ethers.Contract(CONTRACT_ADDRESSES.KRWStablecoin, KRW_ABI, signer);
+      const priceWei = ethers.parseEther(price);
+      
+      const approveTx = await krwContract.approve(CONTRACT_ADDRESSES.GameMarketplace, priceWei);
+      await approveTx.wait();
+      
+      // Then buy the item
+      const marketplaceContract = new ethers.Contract(CONTRACT_ADDRESSES.GameMarketplace, MARKETPLACE_ABI, signer);
+      const buyTx = await marketplaceContract.buyItem(tokenId);
+      await buyTx.wait();
+      
+      await Promise.all([refetchBalance(), refetchNftCount(), refetchMarketplace()]);
+      setLastTransaction('purchase-success');
+    } catch (error) {
+      console.error('Purchase failed:', error);
+      throw error;
+    } finally {
+      setIsTransacting(false);
+    }
+  };
+
   // Fetch owned NFT items
   const refreshItems = async () => {
-    if (!address || !nftCount) return;
+    if (!address || !nftCount) {
+      setOwnedItems([]);
+      return;
+    }
     
     setIsLoadingItems(true);
     try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(CONTRACT_ADDRESSES.GameItemNFT, NFT_ABI, provider);
+      
       const items: GameItem[] = [];
       const count = Number(nftCount);
       
-      // For demo purposes, we'll use mock data
-      // In a real app, this would fetch from the smart contract
-      if (count > 0) {
-        const mockItems: GameItem[] = [
-          {
-            tokenId: '1',
-            itemType: 'sword',
-            rarity: 4,
-            attack: 85,
-            defense: 20,
-            durability: 100,
-            game: 'demo-rpg',
-            mintTimestamp: Date.now() - 86400000,
-            isTransferable: true
-          },
-          {
-            tokenId: '2',
-            itemType: 'shield',
-            rarity: 3,
-            attack: 10,
-            defense: 75,
-            durability: 100,
-            game: 'demo-rpg',
-            mintTimestamp: Date.now() - 172800000,
-            isTransferable: true
-          }
-        ];
-        items.push(...mockItems.slice(0, count));
+      for (let i = 0; i < count; i++) {
+        try {
+          const tokenId = await contract.tokenOfOwnerByIndex(address, i);
+          const gameItem = await contract.gameItems(tokenId);
+          
+          items.push({
+            tokenId: tokenId.toString(),
+            itemType: gameItem.itemType,
+            rarity: Number(gameItem.rarity),
+            attack: Number(gameItem.attack),
+            defense: Number(gameItem.defense),
+            durability: Number(gameItem.durability),
+            game: gameItem.game,
+            mintTimestamp: Number(gameItem.mintTimestamp),
+            isTransferable: gameItem.isTransferable,
+            image: getItemImage(gameItem.itemType, Number(gameItem.rarity))
+          });
+        } catch (error) {
+          console.error(`Error fetching NFT ${i}:`, error);
+        }
       }
       
       setOwnedItems(items);
@@ -190,14 +265,61 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Fetch marketplace items
+  const refreshMarketplace = async () => {
+    if (!marketplaceListings) {
+      setMarketplaceItems([]);
+      return;
+    }
+    
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const nftContract = new ethers.Contract(CONTRACT_ADDRESSES.GameItemNFT, NFT_ABI, provider);
+      
+      const items: GameItem[] = [];
+      
+      for (const listing of marketplaceListings as any[]) {
+        try {
+          const gameItem = await nftContract.gameItems(listing.tokenId);
+          
+          items.push({
+            tokenId: listing.tokenId.toString(),
+            itemType: gameItem.itemType,
+            rarity: Number(gameItem.rarity),
+            attack: Number(gameItem.attack),
+            defense: Number(gameItem.defense),
+            durability: Number(gameItem.durability),
+            game: gameItem.game,
+            mintTimestamp: Number(gameItem.mintTimestamp),
+            isTransferable: gameItem.isTransferable,
+            image: getItemImage(gameItem.itemType, Number(gameItem.rarity)),
+            price: ethers.formatEther(listing.price),
+            isListed: listing.active
+          });
+        } catch (error) {
+          console.error(`Error fetching marketplace item ${listing.tokenId}:`, error);
+        }
+      }
+      
+      setMarketplaceItems(items);
+    } catch (error) {
+      console.error('Failed to fetch marketplace items:', error);
+    }
+  };
+
   // Refresh items when NFT count changes
   useEffect(() => {
-    if (nftCount) {
+    if (isConnected && address) {
       refreshItems();
-    } else {
-      setOwnedItems([]);
     }
-  }, [nftCount, address]);
+  }, [nftCount, address, isConnected]);
+
+  // Refresh marketplace when listings change
+  useEffect(() => {
+    if (isConnected) {
+      refreshMarketplace();
+    }
+  }, [marketplaceListings, isConnected]);
 
   const contextValue: WalletContextType = {
     krwBalance,
@@ -205,8 +327,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     mintTestTokens,
     sendTokens,
     ownedItems,
+    marketplaceItems,
     isLoadingItems,
     refreshItems,
+    refreshMarketplace,
+    buyItem,
     isTransacting,
     lastTransaction
   };
@@ -216,4 +341,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       {children}
     </WalletContext.Provider>
   );
+}
+
+// Global window ethereum declaration
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
 }
