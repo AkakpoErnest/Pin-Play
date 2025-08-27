@@ -193,7 +193,7 @@ contract KRWStablecoin is ERC20, ERC20Permit, Ownable, Pausable, ReentrancyGuard
      * @param krwAmount The amount in KRW to convert
      * @return The equivalent value in USD (with 18 decimals)
      */
-    function getUSDValue(uint256 krwAmount) external view returns (uint256) {
+    function getUSDValue(uint256 krwAmount) external pure returns (uint256) {
         // Simplified conversion: 1 USD ≈ 1300 KRW
         return (krwAmount * 1e18) / 1300;
     }
@@ -203,7 +203,7 @@ contract KRWStablecoin is ERC20, ERC20Permit, Ownable, Pausable, ReentrancyGuard
      * @param usdAmount The amount in USD to convert (with 18 decimals)
      * @return The equivalent value in KRW
      */
-    function getKRWValue(uint256 usdAmount) external view returns (uint256) {
+    function getKRWValue(uint256 usdAmount) external pure returns (uint256) {
         // Simplified conversion: 1 USD ≈ 1300 KRW
         return (usdAmount * 1300) / 1e18;
     }

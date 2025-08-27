@@ -35,49 +35,63 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-16 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 rounded-full blur-xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-neon-pink/20 to-neon-yellow/20 rounded-full blur-xl animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-gaming-400/20 to-gaming-600/20 rounded-full blur-xl animate-float" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Hero Section */}
-      <section className="text-center space-y-8 py-12">
-        <div className="space-y-4">
-          <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-            <Star className="w-4 h-4" />
-            <span>Korea Stablecoin Hackathon Project</span>
+      <section className="text-center space-y-8 py-12 relative">
+        <div className="space-y-6 animate-slide-up">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-gaming-100 to-gaming-200 text-gaming-800 px-6 py-3 rounded-full text-sm font-medium border border-gaming-300 shadow-lg">
+            <Star className="w-5 h-5 text-gaming-600" />
+            <span className="font-semibold">Korea Stablecoin Hackathon Project</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold heading-gradient leading-tight">
+          <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-gaming-600 via-neon-purple to-neon-blue bg-clip-text text-transparent leading-tight animate-neon-pulse">
             KRW Game Credits
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Frictionless NFT & in-game purchase ecosystem powered by KRW stablecoin. 
-            Enabling instant, low-fee, borderless payments for gamers and creators.
-          </p>
+          <div className="relative">
+            <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
+              🎮 Frictionless NFT & in-game purchase ecosystem powered by 
+              <span className="text-krw-600 font-bold"> KRW stablecoin</span>. 
+              Enabling instant, low-fee, borderless payments for gamers and creators.
+            </p>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gaming-100/30 to-transparent blur-sm -z-10"></div>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up" style={{animationDelay: '0.2s'}}>
           {isConnected ? (
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-6">
               <Link 
                 href="/marketplace" 
-                className="btn-primary inline-flex items-center space-x-2 px-8 py-4 text-lg"
+                className="group relative overflow-hidden bg-gradient-to-r from-gaming-600 to-gaming-700 hover:from-gaming-700 hover:to-gaming-800 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-gaming-500/25 inline-flex items-center space-x-3 text-lg"
               >
-                <Gamepad2 className="w-5 h-5" />
-                <span>Explore Marketplace</span>
-                <ArrowRight className="w-4 h-4" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <Gamepad2 className="w-6 h-6 relative z-10" />
+                <span className="relative z-10">Explore Marketplace</span>
+                <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-200" />
               </Link>
               <Link 
                 href="/wallet" 
-                className="btn-secondary inline-flex items-center space-x-2 px-8 py-4 text-lg"
+                className="group relative overflow-hidden bg-gradient-to-r from-dark-700 to-dark-800 hover:from-dark-600 hover:to-dark-700 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-dark-500/25 inline-flex items-center space-x-3 text-lg border border-dark-600"
               >
-                <CreditCard className="w-5 h-5" />
+                <CreditCard className="w-6 h-6" />
                 <span>Manage Wallet</span>
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              <WalletConnection />
-              <p className="text-sm text-gray-500">
-                Connect your wallet to start trading game items with KRW stablecoin
+            <div className="space-y-6 animate-pulse">
+              <div className="transform scale-110">
+                <WalletConnection />
+              </div>
+              <p className="text-gray-600 font-medium">
+                🚀 Connect your wallet to start trading game items with KRW stablecoin
               </p>
             </div>
           )}

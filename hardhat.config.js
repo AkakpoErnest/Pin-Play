@@ -26,7 +26,7 @@ module.exports = {
       chainId: 8217,
     },
     kaia_testnet: {
-      url: "https://public-en-baobab.klaytn.net",
+      url: "https://archive-en.baobab.klaytn.net",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1001,
     },
