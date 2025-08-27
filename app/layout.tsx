@@ -3,9 +3,10 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { WagmiConfig, createConfig, configureChains } from 'wagmi';
-import { hardhat, sepolia } from 'wagmi/chains';
+import { hardhat, sepolia, mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, connectorsForWallets } from '@rainbow-me/rainbowkit';
+import { injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
@@ -14,18 +15,29 @@ import { Toaster } from '@/components/ui/Toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Configure chains & providers
+// Configure chains & providers - including mainnet for better compatibility
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [hardhat, sepolia],
+  [mainnet, sepolia, hardhat],
   [publicProvider()]
 );
 
-// Set up connectors
-const { connectors } = getDefaultWallets({
-  appName: 'KRW Game Credits',
-  projectId: 'YOUR_PROJECT_ID',
-  chains,
-});
+// Set up connectors - simplified approach for better MetaMask compatibility
+const connectors = connectorsForWallets([
+  {
+    groupName: 'Recommended',
+    wallets: [
+      injectedWallet({ 
+        chains,
+        shimDisconnect: true,
+      }),
+      metaMaskWallet({ 
+        chains,
+        projectId: 'demo', // Minimal project ID to avoid WalletConnect issues
+        shimDisconnect: true,
+      }),
+    ],
+  },
+]);
 
 const config = createConfig({
   autoConnect: true,

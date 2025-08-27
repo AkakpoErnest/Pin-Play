@@ -21,6 +21,7 @@ import {
 import WalletConnection from '@/components/WalletConnection';
 import FeatureCard from '@/components/FeatureCard';
 import StatCard from '@/components/StatCard';
+import MetaMaskHelper from '@/components/MetaMaskHelper';
 
 export default function HomePage() {
   const { isConnected } = useAccount();
