@@ -5,7 +5,6 @@ import './globals.css';
 import { WagmiConfig, createConfig, configureChains } from 'wagmi';
 import { hardhat, sepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,16 +17,13 @@ const inter = Inter({ subsets: ['latin'] });
 // Configure chains & providers
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [hardhat, sepolia],
-  [
-    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || 'demo' }),
-    publicProvider(),
-  ]
+  [publicProvider()]
 );
 
 // Set up connectors
 const { connectors } = getDefaultWallets({
   appName: 'KRW Game Credits',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'demo',
+  projectId: 'YOUR_PROJECT_ID',
   chains,
 });
 
