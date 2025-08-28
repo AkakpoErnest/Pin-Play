@@ -22,7 +22,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
-import WalletConnection from '@/components/WalletConnection';
+import SimpleWalletConnection from '@/components/SimpleWalletConnection';
 import { useWallet } from '@/components/WalletProvider';
 import { toast } from '@/components/ui/Toaster';
 
@@ -185,7 +185,7 @@ export default function WalletPage() {
             Connect your wallet to view your KRW Game Credits balance and transaction history
           </p>
         </div>
-        <WalletConnection />
+        <SimpleWalletConnection />
       </div>
     );
   }

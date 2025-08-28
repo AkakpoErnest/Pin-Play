@@ -5,11 +5,10 @@ import './globals.css';
 import { WagmiConfig, createConfig, configureChains } from 'wagmi';
 import { hardhat, sepolia, mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { RainbowKitProvider, connectorsForWallets } from '@rainbow-me/rainbowkit';
-import { injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets';
-import '@rainbow-me/rainbowkit/styles.css';
+import { injected } from 'wagmi/connectors';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import { Toaster } from '@/components/ui/Toaster';
 import { WalletProvider } from '@/components/WalletProvider';
@@ -23,23 +22,8 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [publicProvider()]
 );
 
-// Set up connectors - simplified approach for better MetaMask compatibility
-const connectors = connectorsForWallets([
-  {
-    groupName: 'Recommended',
-    wallets: [
-      injectedWallet({ 
-        chains,
-        shimDisconnect: true,
-      }),
-      metaMaskWallet({ 
-        chains,
-        projectId: 'demo', // Minimal project ID to avoid WalletConnect issues
-        shimDisconnect: true,
-      }),
-    ],
-  },
-]);
+// Set up connectors - Simple MetaMask only
+const connectors = [injected()];
 
 const config = createConfig({
   autoConnect: true,
@@ -95,41 +79,37 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} min-h-screen`}>
-        <ErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <WagmiConfig config={config}>
-              <RainbowKitProvider chains={chains}>
-                <WalletProvider>
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-1 container mx-auto px-4 py-8">
-                      {children}
-                    </main>
-                  <footer className="bg-gray-900 text-white py-8 mt-auto">
-                    <div className="container mx-auto px-4 text-center">
-                      <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">₩</span>
-                          </div>
-                          <span className="font-semibold">KRW Game Credits</span>
+        <QueryClientProvider client={queryClient}>
+          <WagmiConfig config={config}>
+            <WalletProvider>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-1 container mx-auto px-4 py-8">
+                  {children}
+                </main>
+                <footer className="bg-gray-900 text-white py-8 mt-auto">
+                  <div className="container mx-auto px-4 text-center">
+                    <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">₩</span>
                         </div>
-                        <p className="text-gray-400">
-                          Bridging finance and gaming with blockchain technology
-                        </p>
+                        <span className="font-semibold">KRW Game Credits</span>
                       </div>
-                      <div className="mt-6 pt-6 border-t border-gray-700 text-sm text-gray-500">
-                        <p>© 2024 KRW Game Credits. Built for the Korea Stablecoin Hackathon.</p>
-                      </div>
+                      <p className="text-gray-400">
+                        Bridging finance and gaming with blockchain technology
+                      </p>
                     </div>
-                  </footer>
-                </div>
-                <Toaster />
-                </WalletProvider>
-              </RainbowKitProvider>
-            </WagmiConfig>
-          </QueryClientProvider>
-        </ErrorBoundary>
+                    <div className="mt-6 pt-6 border-t border-gray-700 text-sm text-gray-500">
+                      <p>© 2024 KRW Game Credits. Built for the Korea Stablecoin Hackathon.</p>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+              <Toaster />
+            </WalletProvider>
+          </WagmiConfig>
+        </QueryClientProvider>
       </body>
     </html>
   );

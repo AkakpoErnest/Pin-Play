@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import SimpleWalletConnection from './SimpleWalletConnection';
 import { 
   Menu, 
   X, 
@@ -93,13 +93,7 @@ export default function Navbar() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-neon-green to-neon-blue rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-energy-pulse"></div>
                 <div className="relative bg-gradient-to-r from-dark-600 to-dark-800 p-1 rounded-xl border-2 border-neon-green/50 hover:border-neon-green transition-all duration-300">
-                  <ConnectButton 
-                    chainStatus="icon"
-                    accountStatus={{
-                      smallScreen: 'avatar',
-                      largeScreen: 'full',
-                    }}
-                  />
+                  <SimpleWalletConnection />
                 </div>
               </div>
             </div>
@@ -155,10 +149,7 @@ export default function Navbar() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-neon-purple to-neon-pink rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-energy-pulse"></div>
                   <div className="relative bg-gradient-to-r from-dark-700 to-dark-900 p-2 rounded-xl border-2 border-neon-purple/50 hover:border-neon-purple transition-all duration-300">
-                    <ConnectButton 
-                      chainStatus="icon"
-                      accountStatus="avatar"
-                    />
+                    <SimpleWalletConnection />
                   </div>
                 </div>
               </div>
