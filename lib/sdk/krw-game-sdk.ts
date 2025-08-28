@@ -67,7 +67,8 @@ export class KRWGameSDK {
   private static readonly MARKETPLACE_ABI = [
     'function buyItem(uint256 tokenId) public',
     'function listItem(uint256 tokenId, uint256 price) public',
-    'function getActiveListings(uint256 offset, uint256 limit) public view returns (uint256[], address[], uint256[])',
+    'function getActiveListings() public view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime)[])',
+    'function getListingByTokenId(uint256 tokenId) public view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime))',
     'event ItemSold(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price)'
   ];
 
@@ -226,13 +227,26 @@ export class KRWGameSDK {
     averagePrice: string;
   }> {
     try {
-      // In a real implementation, this would fetch actual marketplace data
-      const [tokenIds] = await this.contracts.gameMarketplace!.getActiveListings(0, 100);
+      // Fetch actual marketplace data
+      const listings = await this.contracts.gameMarketplace!.getActiveListings();
+      
+      let totalVolume = 0;
+      let totalPrice = 0;
+      let activeCount = 0;
+      
+      for (const listing of listings) {
+        if (listing.active) {
+          activeCount++;
+          const price = parseFloat(ethers.formatEther(listing.price));
+          totalPrice += price;
+          totalVolume += price; // Simplified volume calculation
+        }
+      }
       
       return {
-        activeListings: tokenIds.length,
-        totalVolume: "2450000", // Mock data
-        averagePrice: "12500"   // Mock data
+        activeListings: activeCount,
+        totalVolume: totalVolume.toString(),
+        averagePrice: activeCount > 0 ? (totalPrice / activeCount).toString() : "0"
       };
     } catch (error) {
       throw new Error(`Failed to get marketplace stats: ${error}`);

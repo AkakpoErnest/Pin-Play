@@ -67,10 +67,10 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={clsx(
-                    'group relative flex items-center space-x-3 px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 border-2 shadow-lg',
+                    'group relative flex items-center space-x-3 px-6 py-4 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 border-2 shadow-lg cursor-pointer',
                     isActive
-                      ? `bg-gradient-to-r from-${item.color}/20 to-${item.color}/30 border-${item.color}/50 text-white shadow-${item.color}/30 animate-energy-pulse`
-                      : `text-white hover:text-${item.color} border-transparent hover:border-${item.color}/50 hover:bg-gradient-to-r hover:from-dark-600/50 hover:to-dark-800/50 hover:shadow-${item.color}/20`
+                      ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/30 border-blue-500/50 text-white shadow-blue-500/30 animate-pulse'
+                      : 'text-white hover:text-blue-400 border-transparent hover:border-blue-500/50 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-800/50 hover:shadow-blue-500/20'
                   )}
                   style={{animationDelay: `${index * 0.1}s`}}
                 >

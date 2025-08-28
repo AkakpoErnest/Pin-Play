@@ -31,10 +31,10 @@ const NFT_ABI = [
 ] as const;
 
 const MARKETPLACE_ABI = [
-  'function getActiveListings() view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime)[])',
+  'function getActiveListings(uint256 offset, uint256 limit) view returns (uint256[] tokenIds, address[] sellers, uint256[] prices)',
   'function listItem(uint256 tokenId, uint256 price)',
   'function buyItem(uint256 tokenId) payable',
-  'function getListingByTokenId(uint256 tokenId) view returns (tuple(uint256 tokenId, address seller, uint256 price, bool active, uint256 listingTime))'
+  'function listings(uint256 tokenId) view returns (address seller, uint256 price, uint256 timestamp, bool active)'
 ] as const;
 
 export interface GameItem {
@@ -147,9 +147,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     address: CONTRACT_ADDRESSES.GameMarketplace as `0x${string}`,
     abi: MARKETPLACE_ABI,
     functionName: 'getActiveListings',
-    enabled: isConnected,
+    args: [0, 50], // offset 0, limit 50
+    enabled: true, // Always enabled to fetch marketplace data
     watch: true,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Marketplace listings data:', marketplaceListings);
+    console.log('Contract addresses:', CONTRACT_ADDRESSES);
+    console.log('Is connected:', isConnected);
+  }, [marketplaceListings, isConnected]);
 
   // Format KRW balance
   const krwBalance = krwBalanceData ? ethers.formatEther(krwBalanceData.toString()) : '0';
@@ -288,17 +296,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
+      console.log('Raw marketplace data:', marketplaceListings);
+      
       const provider = new ethers.BrowserProvider(window.ethereum);
       const nftContract = new ethers.Contract(CONTRACT_ADDRESSES.GameItemNFT, NFT_ABI, provider);
       
       const items: GameItem[] = [];
       
-      for (const listing of marketplaceListings as any[]) {
+      // The data structure is now [tokenIds[], sellers[], prices[]]
+      const [tokenIds, sellers, prices] = marketplaceListings as [bigint[], string[], bigint[]];
+      
+      for (let i = 0; i < tokenIds.length; i++) {
         try {
-          const gameItem = await nftContract.gameItems(listing.tokenId);
+          const tokenId = tokenIds[i];
+          const seller = sellers[i];
+          const price = prices[i];
+          
+          const gameItem = await nftContract.gameItems(tokenId);
           
           items.push({
-            tokenId: listing.tokenId.toString(),
+            tokenId: tokenId.toString(),
             itemType: gameItem.itemType,
             rarity: Number(gameItem.rarity),
             attack: Number(gameItem.attack),
@@ -308,14 +325,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             mintTimestamp: Number(gameItem.mintTimestamp),
             isTransferable: gameItem.isTransferable,
             image: getItemImage(gameItem.itemType, Number(gameItem.rarity)),
-            price: ethers.formatEther(listing.price),
-            isListed: listing.active
+            price: ethers.formatEther(price),
+            isListed: true // All items returned are active listings
           });
         } catch (error) {
-          console.error(`Error fetching marketplace item ${listing.tokenId}:`, error);
+          console.error(`Error fetching marketplace item ${tokenIds[i]}:`, error);
         }
       }
       
+      console.log('Processed marketplace items:', items);
       setMarketplaceItems(items);
     } catch (error) {
       console.error('Failed to fetch marketplace items:', error);
