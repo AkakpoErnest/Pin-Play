@@ -5,7 +5,10 @@ import './globals.css';
 import { WagmiConfig, createConfig, configureChains } from 'wagmi';
 import { hardhat, sepolia, mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { RainbowKitProvider, connectorsForWallets } from '@rainbow-me/rainbowkit';
+import { injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets';
 import { injected } from 'wagmi/connectors';
+import '@rainbow-me/rainbowkit/styles.css';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
@@ -22,8 +25,26 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [publicProvider()]
 );
 
-// Set up connectors - Simple MetaMask only
-const connectors = [injected()];
+// Set up connectors - Multiple options
+const rainbowConnectors = connectorsForWallets([
+  {
+    groupName: 'Recommended',
+    wallets: [
+      metaMaskWallet({ 
+        chains,
+        projectId: 'metamask-direct',
+        shimDisconnect: true,
+      }),
+      injectedWallet({ 
+        chains,
+        shimDisconnect: true,
+      }),
+    ],
+  },
+]);
+
+// Also include simple injected connector for direct MetaMask
+const connectors = [injected(), ...rainbowConnectors];
 
 const config = createConfig({
   autoConnect: true,
@@ -81,33 +102,35 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-screen`}>
         <QueryClientProvider client={queryClient}>
           <WagmiConfig config={config}>
-            <WalletProvider>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-1 container mx-auto px-4 py-8">
-                  {children}
-                </main>
-                <footer className="bg-gray-900 text-white py-8 mt-auto">
-                  <div className="container mx-auto px-4 text-center">
-                    <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">₩</span>
+            <RainbowKitProvider chains={chains}>
+              <WalletProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-1 container mx-auto px-4 py-8">
+                    {children}
+                  </main>
+                  <footer className="bg-gray-900 text-white py-8 mt-auto">
+                    <div className="container mx-auto px-4 text-center">
+                      <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">₩</span>
+                          </div>
+                          <span className="font-semibold">KRW Game Credits</span>
                         </div>
-                        <span className="font-semibold">KRW Game Credits</span>
+                        <p className="text-gray-400">
+                          Bridging finance and gaming with blockchain technology
+                        </p>
                       </div>
-                      <p className="text-gray-400">
-                        Bridging finance and gaming with blockchain technology
-                      </p>
+                      <div className="mt-6 pt-6 border-t border-gray-700 text-sm text-gray-500">
+                        <p>© 2024 KRW Game Credits. Built for the Korea Stablecoin Hackathon.</p>
+                      </div>
                     </div>
-                    <div className="mt-6 pt-6 border-t border-gray-700 text-sm text-gray-500">
-                      <p>© 2024 KRW Game Credits. Built for the Korea Stablecoin Hackathon.</p>
-                    </div>
-                  </div>
-                </footer>
-              </div>
-              <Toaster />
-            </WalletProvider>
+                  </footer>
+                </div>
+                <Toaster />
+              </WalletProvider>
+            </RainbowKitProvider>
           </WagmiConfig>
         </QueryClientProvider>
       </body>
